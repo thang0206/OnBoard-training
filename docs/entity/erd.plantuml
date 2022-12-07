@@ -1,0 +1,72 @@
+@startuml TODO
+
+' skinparam linetype ortho
+
+entity User {
+    -id: ObjectId <<generated>>
+    --
+    *name: String
+    *email: String
+    *password: String
+    +createdAt: Date
+    +updatedAt: Date
+}
+
+entity Task {
+    -id: ObjectId <<generated>>
+    --
+    ~projectId: ObjectId
+    ~linkedTo: ObjectId
+    ~assignTo: ObjectId
+    ~createdBy: ObjectId
+    ~updatedBy: ObjectId
+    --
+    *title: String
+    +status: ETaskStatus
+    +description: String
+    +createdAt: Date
+    +updatedAt: Date
+}
+
+entity Project {
+    -id: ObjectId <<generated>>
+    --
+    ~createdBy: ObjectId
+    ~updatedBy: ObjectId
+    --
+    *title: String
+    *isCreatedByAdmin: Boolean
+    +description: String
+    +createdAt: Date
+    +updatedAt: Date
+}
+
+entity ProjectUser {
+    -id: ObjectId <<generated>>
+    --
+    projectId: ObjectId
+    userId: ObjectId
+    --
+    *role: ERole
+}
+
+enum ERole {
+    USER
+    ADMIN
+}
+
+enum ETaskStatus {
+    TODO
+    DOING
+    DONE
+}
+
+User ||--|{ Task
+Task ||--|{ Task
+Project ||-|{ Task
+Project ||--|{ ProjectUser
+User ||--|{ ProjectUser
+ETaskStatus -- Task
+ERole -- ProjectUser
+
+@enduml
