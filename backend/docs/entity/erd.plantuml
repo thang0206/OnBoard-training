@@ -1,13 +1,12 @@
 @startuml TODO
 
-' skinparam linetype ortho
+skinparam linetype ortho
 
 entity User {
     -id: ObjectId <<generated>>
     --
     *name: String
     *email: String
-    *password: String
     +createdAt: Date
     +updatedAt: Date
 }
@@ -50,6 +49,14 @@ entity ProjectUser {
     *role: ERole
 }
 
+entity UserCredential {
+    -id: ObjectId <<generated>>
+    --
+    ~userId: ObjectId
+    --
+    *password: String
+}
+
 enum ERole {
     USER
     ADMIN
@@ -61,11 +68,12 @@ enum ETaskStatus {
     DONE
 }
 
-User ||--|{ Task
-Task ||--|{ Task
+Task }|--|| User
+Task ||--o| Task
 Project ||-|{ Task
 Project ||--|{ ProjectUser
 User ||--|{ ProjectUser
+User ||--|| UserCredential
 ETaskStatus -- Task
 ERole -- ProjectUser
 
