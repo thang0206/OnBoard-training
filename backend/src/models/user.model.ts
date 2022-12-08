@@ -1,6 +1,5 @@
-import {Entity, model, property} from '@loopback/repository';
-
-
+import {Entity, model, property, hasMany, hasOne} from '@loopback/repository';
+import {Task} from './task.model';
 
 @model()
 export class User extends Entity {
@@ -30,15 +29,19 @@ export class User extends Entity {
   password: string;
 
   @property({
-    type: 'date',
+    type: 'Date',
+    default: new Date()
   })
-  createdAt?: string;
+  createdAt?: Date
 
   @property({
-    type: 'date',
+    type: 'Date',
+    default: new Date()
   })
-  updatedAt?: string;
+  updatedAt?: Date
 
+  @hasMany(() => Task)
+  tasks: Task[];
 
   constructor(data?: Partial<User>) {
     super(data);

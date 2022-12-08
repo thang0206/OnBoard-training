@@ -1,4 +1,6 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {EStatus} from '../constants'
+import {User} from './user.model';
 
 @model()
 export class Task extends Entity {
@@ -17,8 +19,11 @@ export class Task extends Entity {
 
   @property({
     type: 'string',
+    jsonSchema: {
+      enum: Object.values(EStatus),
+    },
   })
-  status?: string;
+  status?: EStatus;
 
   @property({
     type: 'string',
@@ -26,14 +31,38 @@ export class Task extends Entity {
   description?: string;
 
   @property({
-    type: 'date',
+    type: 'Date',
+    default: new Date()
   })
-  createdAt?: string;
+  createdAt?: Date
 
   @property({
-    type: 'date',
+    type: 'Date',
+    default: new Date()
   })
-  updatedAt?: string;
+  updatedAt?: Date
+
+  @property({
+    type: 'string',
+  })
+  userId?: string;
+
+  @belongsTo(() => User, {name: 'assignee'})
+  assignedTo: string;
+
+  @belongsTo(() => Task, {name: 'link'})
+  linkedTo: string;
+
+  @belongsTo(() => User, {name: 'creator'})
+  createdBy: string;
+
+  @belongsTo(() => User, {name: 'updater'})
+  updatedBy: string;
+
+  @property({
+    type: 'string',
+  })
+  tasks?: string;
 
   constructor(data?: Partial<Task>) {
     super(data);
