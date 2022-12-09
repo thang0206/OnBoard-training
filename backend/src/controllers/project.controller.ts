@@ -1,4 +1,6 @@
-import { authenticate } from '@loopback/authentication';
+import { authenticate, AuthenticationBindings } from '@loopback/authentication';
+import { inject } from '@loopback/core';
+import {UserProfile} from '@loopback/security';
 import {
   Count,
   CountSchema,
@@ -18,14 +20,19 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import _ from 'lodash';
 import {Project} from '../models';
-import {ProjectRepository} from '../repositories';
+import {ProjectRepository, ProjectUserRepository} from '../repositories';
+import { ERole } from '../constants';
 
 @authenticate('jwt')
 export class ProjectController {
   constructor(
     @repository(ProjectRepository)
     public projectRepository : ProjectRepository,
+
+    @repository(ProjectUserRepository)
+    public projectUserRepository: ProjectUserRepository,
   ) {}
 
   @post('/projects')
@@ -34,19 +41,30 @@ export class ProjectController {
     content: {'application/json': {schema: getModelSchemaRef(Project)}},
   })
   async create(
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
     @requestBody({
       content: {
         'application/json': {
           schema: getModelSchemaRef(Project, {
             title: 'NewProject',
-            exclude: ['id'],
+            exclude: ['id', 'createdAt', 'updatedAt', 'createdBy'],
           }),
         },
       },
     })
     project: Omit<Project, 'id'>,
   ): Promise<Project> {
-    return this.projectRepository.create(project);
+    const userId = currentUser.id;
+    _.set(project, 'createdBy', userId);
+    const savedProject = await this.projectRepository.create(project)
+    const savedProjectUser = {
+      projectId: savedProject.id,
+      userId: userId,
+      role: ERole.ADMIN
+    }
+    await this.projectUserRepository.create(savedProjectUser)
+    return savedProject;
   }
 
   @get('/projects/count')
@@ -118,16 +136,24 @@ export class ProjectController {
     description: 'Project PATCH success',
   })
   async updateById(
+    @inject(AuthenticationBindings.CURRENT_USER)
+    currentUser: UserProfile,
     @param.path.string('id') id: string,
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Project, {partial: true}),
+          schema: getModelSchemaRef(Project, {
+            partial: true,
+            exclude: ['id', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy']
+          }),
         },
       },
     })
     project: Project,
   ): Promise<void> {
+    const userId = currentUser.id;
+    _.set(project, 'updatedBy', userId);
+    _.set(project, 'updatedAt', new Date());
     await this.projectRepository.updateById(id, project);
   }
 
