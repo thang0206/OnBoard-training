@@ -21,6 +21,7 @@ entity Task {
     ~updatedBy: ObjectId
     --
     *title: String
+    *isCreatedByAdmin: Boolean
     +status: ETaskStatus
     +description: String
     +createdAt: Date
@@ -34,7 +35,6 @@ entity Project {
     ~updatedBy: ObjectId
     --
     *title: String
-    *isCreatedByAdmin: Boolean
     +description: String
     +createdAt: Date
     +updatedAt: Date

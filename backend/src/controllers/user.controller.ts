@@ -1,5 +1,4 @@
 import { authenticate, AuthenticationBindings } from '@loopback/authentication';
-import {UserProfile} from '@loopback/security';
 import {
   Count,
   CountSchema,

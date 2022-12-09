@@ -1,4 +1,3 @@
-import { authenticate } from '@loopback/authentication';
 import {
   repository,
 } from '@loopback/repository';
@@ -9,32 +8,31 @@ import {
 } from '@loopback/rest';
 import {
   Task,
-  User,
+  Project,
 } from '../models';
 import {TaskRepository} from '../repositories';
 
-@authenticate('jwt')
-export class TaskUserController {
+export class TaskProjectController {
   constructor(
     @repository(TaskRepository)
     public taskRepository: TaskRepository,
   ) { }
 
-  @get('/tasks/{id}/user', {
+  @get('/tasks/{id}/project', {
     responses: {
       '200': {
-        description: 'User belonging to Task',
+        description: 'Project belonging to Task',
         content: {
           'application/json': {
-            schema: {type: 'array', items: getModelSchemaRef(User)},
+            schema: {type: 'array', items: getModelSchemaRef(Project)},
           },
         },
       },
     },
   })
-  async getUser(
+  async getProject(
     @param.path.string('id') id: typeof Task.prototype.id,
-  ): Promise<User> {
-    return this.taskRepository.updater(id);
+  ): Promise<Project> {
+    return this.taskRepository.project(id);
   }
 }

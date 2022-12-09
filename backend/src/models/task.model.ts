@@ -1,6 +1,7 @@
 import {Entity, model, property, belongsTo} from '@loopback/repository';
 import {EStatus} from '../constants'
 import {User} from './user.model';
+import {Project} from './project.model';
 
 @model()
 export class Task extends Entity {
@@ -16,6 +17,12 @@ export class Task extends Entity {
     required: true,
   })
   title: string;
+
+  @property({
+    type: 'boolean',
+    required: true,
+  })
+  isCreatedByAdmin: boolean;
 
   @property({
     type: 'string',
@@ -47,6 +54,11 @@ export class Task extends Entity {
   })
   userId?: string;
 
+  @property({
+    type: 'string',
+  })
+  tasks?: string;
+
   @belongsTo(() => User, {name: 'assignee'})
   assignedTo: string;
 
@@ -59,10 +71,8 @@ export class Task extends Entity {
   @belongsTo(() => User, {name: 'updater'})
   updatedBy: string;
 
-  @property({
-    type: 'string',
-  })
-  tasks?: string;
+  @belongsTo(() => Project)
+  projectId: string;
 
   constructor(data?: Partial<Task>) {
     super(data);
