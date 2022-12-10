@@ -1,6 +1,6 @@
-import { authenticate, AuthenticationBindings } from '@loopback/authentication';
+import { authenticate } from '@loopback/authentication';
 import { inject } from '@loopback/core';
-import {UserProfile} from '@loopback/security';
+import {SecurityBindings, UserProfile} from '@loopback/security';
 import {
   Count,
   CountSchema,
@@ -57,7 +57,7 @@ export class ProjectTaskController {
     },
   })
   async find(
-    @inject(AuthenticationBindings.CURRENT_USER)
+    @inject(SecurityBindings.USER)
     currentUser: UserProfile,
     @param.path.string('projectId') projectId: string,
     @param.query.object('filter') filter?: Filter<Task>,
@@ -88,7 +88,7 @@ export class ProjectTaskController {
     },
   })
   async create(
-    @inject(AuthenticationBindings.CURRENT_USER)
+    @inject(SecurityBindings.USER)
     currentUser: UserProfile,
     @param.path.string('projectId') projectId: string,
     @requestBody({
@@ -122,7 +122,7 @@ export class ProjectTaskController {
     },
   })
   async patch(
-    @inject(AuthenticationBindings.CURRENT_USER)
+    @inject(SecurityBindings.USER)
     currentUser: UserProfile,
     @param.path.string('projectId') projectId: string,
     @param.path.string('taskId') taskId: string,

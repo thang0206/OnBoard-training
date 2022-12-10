@@ -70,7 +70,7 @@ enum ETaskStatus {
 
 Task }|--|| User
 Task ||--o| Task
-Project ||-|{ Task
+Project ||--|{ Task
 Project ||--|{ ProjectUser
 User ||--|{ ProjectUser
 User ||--|| UserCredential

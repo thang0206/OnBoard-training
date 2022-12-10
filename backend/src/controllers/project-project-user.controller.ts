@@ -1,3 +1,6 @@
+import { authenticate } from '@loopback/authentication';
+import { inject } from '@loopback/core';
+import {SecurityBindings, UserProfile} from '@loopback/security';
 import {
   Count,
   CountSchema,
@@ -10,6 +13,7 @@ import {
   get,
   getModelSchemaRef,
   getWhereSchemaFor,
+  HttpErrors,
   param,
   patch,
   post,
@@ -19,11 +23,19 @@ import {
   Project,
   ProjectUser,
 } from '../models';
-import {ProjectRepository} from '../repositories';
+import {ProjectRepository, ProjectUserRepository} from '../repositories';
+import { validateProject } from '../services/validator-service';
+import { ERole } from '../constants';
+import _ from 'lodash';
 
+@authenticate('jwt')
 export class ProjectProjectUserController {
   constructor(
-    @repository(ProjectRepository) protected projectRepository: ProjectRepository,
+    @repository(ProjectRepository) 
+    protected projectRepository: ProjectRepository,
+
+    @repository(ProjectUserRepository)
+    public projectUserRepository: ProjectUserRepository
   ) { }
 
   @get('/projects/{id}/project-users', {
@@ -54,20 +66,28 @@ export class ProjectProjectUserController {
     },
   })
   async create(
-    @param.path.string('id') id: typeof Project.prototype.id,
+    @inject(SecurityBindings.USER)
+    currentUser: UserProfile,
+    @param.path.string('id') id: string,
     @requestBody({
       content: {
         'application/json': {
           schema: getModelSchemaRef(ProjectUser, {
             title: 'NewProjectUserInProject',
-            exclude: ['id'],
-            optional: ['projectId']
+            exclude: ['id', 'projectId'],
+            // optional: ['projectId']
           }),
         },
       },
     }) projectUser: Omit<ProjectUser, 'id'>,
   ): Promise<ProjectUser> {
-    return this.projectRepository.projectUsers(id).create(projectUser);
+    const userId = currentUser?.id;
+    const currentProjectUser = await validateProject(userId, id, this.projectUserRepository)
+    if (currentProjectUser.role !== ERole.ADMIN) {
+      throw new HttpErrors.UnprocessableEntity('Can not assign');
+    }
+    _.set(projectUser, 'projectId', id)
+    return this.projectUserRepository.create(projectUser);
   }
 
   @patch('/projects/{id}/project-users', {

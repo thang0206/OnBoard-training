@@ -1,4 +1,4 @@
-import { authenticate, AuthenticationBindings } from '@loopback/authentication';
+import { authenticate } from '@loopback/authentication';
 import {
   Count,
   CountSchema,
