@@ -1,6 +1,6 @@
 import { authenticate, AuthenticationBindings } from '@loopback/authentication';
 import { inject } from '@loopback/core';
-import {UserProfile} from '@loopback/security';
+import {SecurityBindings, UserProfile} from '@loopback/security';
 import {
   Count,
   CountSchema,
@@ -41,7 +41,7 @@ export class ProjectController {
     content: {'application/json': {schema: getModelSchemaRef(Project)}},
   })
   async create(
-    @inject(AuthenticationBindings.CURRENT_USER)
+    @inject(SecurityBindings.USER)
     currentUser: UserProfile,
     @requestBody({
       content: {
