@@ -4,14 +4,18 @@ import {repository} from '@loopback/repository';
 import {HttpErrors} from '@loopback/rest';
 import {securityId, UserProfile} from '@loopback/security';
 import {PasswordHasherBindings} from '../keys';
-import {User} from '../models';
+import {User, UserCredential} from '../models';
 import {Credentials, UserRepository} from '../repositories/user.repository';
+import { UserCredentialRepository } from '../repositories/user-creadential.repository';
 import {BcryptHasher} from './hash.password';
 
 export class MyUserService implements UserService<User, Credentials>{
   constructor(
     @repository(UserRepository)
     public UserRepository: UserRepository,
+
+    @repository(UserCredentialRepository)
+    public UserCredentialRepository: UserCredentialRepository,
 
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
     public hasher: BcryptHasher
@@ -37,6 +41,7 @@ export class MyUserService implements UserService<User, Credentials>{
       [securityId]: user.id!.toString(),
       id: user.id,
       email: user.email,
+      password: user.password
     };
     // throw new Error('Method not implemented.');
   }

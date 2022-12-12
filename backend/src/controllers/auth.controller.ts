@@ -3,8 +3,8 @@ import {repository} from '@loopback/repository';
 import {getModelSchemaRef, post, requestBody} from '@loopback/rest';
 import * as _ from 'lodash';
 import {UserServiceBindings, PasswordHasherBindings, TokenServiceBindings} from '../keys';
-import {User} from '../models';
-import {Credentials, UserRepository} from '../repositories';
+import {User, UserCredential} from '../models';
+import {Credentials, UserCredentialRepository, UserRepository} from '../repositories';
 import {BcryptHasher} from '../services/hash.password';
 import {JWTService} from '../services/jwt-service';
 import {MyUserService} from '../services/user-service';
@@ -14,6 +14,9 @@ export class AuthController {
   constructor(
     @repository(UserRepository)
     public userRepository: UserRepository,
+
+    @repository(UserCredentialRepository)
+    public userCredentialRepository: UserCredentialRepository,
 
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
     public hasher: BcryptHasher,
@@ -53,6 +56,10 @@ export class AuthController {
         await validateCredentials(_.pick(userData, ['email', 'password']), this.userRepository);
         userData.password = await this.hasher.hashPassword(userData.password);
         const savedUser = await this.userRepository.create(userData);
+        await this.userCredentialRepository.create({
+          password: savedUser.password,
+          userId: savedUser.id
+        })
         return _.omit(savedUser, 'password');
     }
 
